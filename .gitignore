@@ -34,6 +34,7 @@ share/python-wheels/
 MANIFEST
 
 .files/
+experiment.data/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -238,3 +239,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+.aider*

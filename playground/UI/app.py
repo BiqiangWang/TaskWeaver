@@ -450,7 +450,7 @@ async def main(message: cl.Message):
             )
         elements = file_display(files, session_cwd_path)
         await cl.Message(
-            author="TaskWeaver",
+            author="data science agent",
             content=f"{user_msg_content}",
             elements=elements if len(elements) > 0 else None,
         ).send()

@@ -1,195 +1,231 @@
 {
-    "greeting": "你好",
-    "farewell": "再见",
-    "thank_you": "谢谢",
-    "yes": "是",
-    "no": "否",
-    "please_wait": "请稍候",
-    "error_occurred": "发生错误",
-    "loading": "加载中",
-    "submit": "提交",
-    "cancel": "取消",
-    "confirm": "确认",
-    "back": "返回",
-    "next": "下一个",
-    "previous": "上一个",
-    "finish": "完成",
-    "start": "开始",
-    "stop": "停止",
-    "pause": "暂停",
-    "resume": "继续",
-    "retry": "重试",
-    "save": "保存",
-    "delete": "删除",
-    "edit": "编辑",
-    "update": "更新",
-    "search": "搜索",
-    "filter": "过滤",
-    "sort": "排序",
-    "refresh": "刷新",
-    "view": "查看",
-    "details": "详情",
-    "settings": "设置",
-    "profile": "个人资料",
-    "logout": "登出",
-    "login": "登录",
-    "register": "注册",
-    "username": "用户名",
-    "password": "密码",
-    "email": "电子邮件",
-    "phone": "电话",
-    "address": "地址",
-    "city": "城市",
-    "state": "州",
-    "country": "国家",
-    "zip_code": "邮政编码",
-    "language": "语言",
-    "theme": "主题",
-    "dark_mode": "暗模式",
-    "light_mode": "亮模式",
-    "notifications": "通知",
-    "privacy_policy": "隐私政策",
-    "terms_of_service": "服务条款",
-    "help": "帮助",
-    "about": "关于",
-    "contact_us": "联系我们",
-    "feedback": "反馈",
-    "faq": "常见问题",
-    "support": "支持",
-    "version": "版本",
-    "release_notes": "发行说明",
-    "license": "许可证",
-    "open_source": "开源",
-    "community": "社区",
-    "contributors": "贡献者",
-    "documentation": "文档",
-    "tutorials": "教程",
-    "examples": "示例",
-    "api": "API",
-    "cli": "CLI",
-    "sdk": "SDK",
-    "integration": "集成",
-    "plugin": "插件",
-    "extension": "扩展",
-    "module": "模块",
-    "component": "组件",
-    "widget": "小部件",
-    "tool": "工具",
-    "dashboard": "仪表板",
-    "report": "报告",
-    "analytics": "分析",
-    "monitoring": "监控",
-    "alert": "警报",
-    "log": "日志",
-    "event": "事件",
-    "task": "任务",
-    "job": "工作",
-    "queue": "队列",
-    "schedule": "时间表",
-    "workflow": "工作流",
-    "pipeline": "管道",
-    "process": "过程",
-    "service": "服务",
-    "server": "服务器",
-    "client": "客户端",
-    "database": "数据库",
-    "table": "表",
-    "column": "列",
-    "row": "行",
-    "record": "记录",
-    "field": "字段",
-    "index": "索引",
-    "query": "查询",
-    "transaction": "事务",
-    "backup": "备份",
-    "restore": "恢复",
-    "migration": "迁移",
-    "schema": "架构",
-    "model": "模型",
-    "view": "视图",
-    "controller": "控制器",
-    "route": "路由",
-    "middleware": "中间件",
-    "authentication": "认证",
-    "authorization": "授权",
-    "encryption": "加密",
-    "decryption": "解密",
-    "hashing": "哈希",
-    "compression": "压缩",
-    "decompression": "解压缩",
-    "serialization": "序列化",
-    "deserialization": "反序列化",
-    "validation": "验证",
-    "testing": "测试",
-    "debugging": "调试",
-    "profiling": "分析",
-    "optimization": "优化",
-    "deployment": "部署",
-    "configuration": "配置",
-    "environment": "环境",
-    "variable": "变量",
-    "constant": "常量",
-    "parameter": "参数",
-    "argument": "参数",
-    "option": "选项",
-    "flag": "标志",
-    "switch": "开关",
-    "case": "情况",
-    "condition": "条件",
-    "loop": "循环",
-    "iteration": "迭代",
-    "recursion": "递归",
-    "function": "函数",
-    "method": "方法",
-    "class": "类",
-    "object": "对象",
-    "instance": "实例",
-    "attribute": "属性",
-    "property": "属性",
-    "field": "字段",
-    "member": "成员",
-    "interface": "接口",
-    "abstract": "抽象",
-    "concrete": "具体",
-    "inheritance": "继承",
-    "polymorphism": "多态",
-    "encapsulation": "封装",
-    "abstraction": "抽象",
-    "composition": "组合",
-    "aggregation": "聚合",
-    "association": "关联",
-    "dependency": "依赖",
-    "coupling": "耦合",
-    "cohesion": "内聚",
-    "modularity": "模块化",
-    "reusability": "可重用性",
-    "maintainability": "可维护性",
-    "scalability": "可扩展性",
-    "performance": "性能",
-    "efficiency": "效率",
-    "reliability": "可靠性",
-    "availability": "可用性",
-    "security": "安全性",
-    "usability": "可用性",
-    "accessibility": "可访问性",
-    "compatibility": "兼容性",
-    "portability": "可移植性",
-    "interoperability": "互操作性",
-    "extensibility": "可扩展性",
-    "flexibility": "灵活性",
-    "simplicity": "简单性",
-    "complexity": "复杂性",
-    "robustness": "健壮性",
-    "resilience": "弹性",
-    "adaptability": "适应性",
-    "scalability": "可扩展性",
-    "portability": "可移植性",
-    "interoperability": "互操作性",
-    "extensibility": "可扩展性",
-    "flexibility": "灵活性",
-    "simplicity": "简单性",
-    "complexity": "复杂性",
-    "robustness": "健壮性",
-    "resilience": "弹性",
-    "adaptability": "适应性"
+    "components": {
+        "atoms": {
+            "buttons": {
+                "userButton": {
+                    "menu": {
+                        "settings": "Settings",
+                        "settingsKey": "S",
+                        "APIKeys": "API Keys",
+                        "logout": "Logout"
+                    }
+                }
+            }
+        },
+        "molecules": {
+            "newChatButton": {
+                "newChat": "New Chat"
+            },
+            "tasklist": {
+                "TaskList": {
+                    "title": "\ud83d\uddd2\ufe0f Task List",
+                    "loading": "Loading...",
+                    "error": "An error occured"
+                }
+            },
+            "attachments": {
+                "cancelUpload": "Cancel upload",
+                "removeAttachment": "Remove attachment"
+            },
+            "newChatDialog": {
+                "createNewChat": "Create new chat?",
+                "clearChat": "This will clear the current messages and start a new chat.",
+                "cancel": "Cancel",
+                "confirm": "Confirm"
+            },
+            "settingsModal": {
+                "settings": "Settings",
+                "expandMessages": "Expand Messages",
+                "hideChainOfThought": "Hide Chain of Thought",
+                "darkMode": "Dark Mode"
+            },
+            "detailsButton": {
+                "using": "Using",
+                "running": "Running",
+                "took_one": "Took {{count}} step",
+                "took_other": "Took {{count}} steps"
+            },
+            "auth": {
+                "authLogin": {
+                    "title": "Login to access the app.",
+                    "form": {
+                        "email": "Email address",
+                        "password": "Password",
+                        "noAccount": "Don't have an account?",
+                        "alreadyHaveAccount": "Already have an account?",
+                        "signup": "Sign Up",
+                        "signin": "Sign In",
+                        "or": "OR",
+                        "continue": "Continue",
+                        "forgotPassword": "Forgot password?",
+                        "passwordMustContain": "Your password must contain:",
+                        "emailRequired": "email is a required field",
+                        "passwordRequired": "password is a required field"
+                    },
+                    "error": {
+                        "default": "Unable to sign in.",
+                        "signin": "Try signing in with a different account.",
+                        "oauthsignin": "Try signing in with a different account.",
+                        "redirect_uri_mismatch": "The redirect URI is not matching the oauth app configuration.",
+                        "oauthcallbackerror": "Try signing in with a different account.",
+                        "oauthcreateaccount": "Try signing in with a different account.",
+                        "emailcreateaccount": "Try signing in with a different account.",
+                        "callback": "Try signing in with a different account.",
+                        "oauthaccountnotlinked": "To confirm your identity, sign in with the same account you used originally.",
+                        "emailsignin": "The e-mail could not be sent.",
+                        "emailverify": "Please verify your email, a new email has been sent.",
+                        "credentialssignin": "Sign in failed. Check the details you provided are correct.",
+                        "sessionrequired": "Please sign in to access this page."
+                    }
+                },
+                "authVerifyEmail": {
+                    "almostThere": "You're almost there! We've sent an email to ",
+                    "verifyEmailLink": "Please click on the link in that email to complete your signup.",
+                    "didNotReceive": "Can't find the email?",
+                    "resendEmail": "Resend email",
+                    "goBack": "Go Back",
+                    "emailSent": "Email sent successfully.",
+                    "verifyEmail": "Verify your email address"
+                },
+                "providerButton": {
+                    "continue": "Continue with {{provider}}",
+                    "signup": "Sign up with {{provider}}"
+                },
+                "authResetPassword": {
+                    "newPasswordRequired": "New password is a required field",
+                    "passwordsMustMatch": "Passwords must match",
+                    "confirmPasswordRequired": "Confirm password is a required field",
+                    "newPassword": "New password",
+                    "confirmPassword": "Confirm password",
+                    "resetPassword": "Reset Password"
+                },
+                "authForgotPassword": {
+                    "email": "Email address",
+                    "emailRequired": "email is a required field",
+                    "emailSent": "Please check the email address {{email}} for instructions to reset your password.",
+                    "enterEmail": "Enter your email address and we will send you instructions to reset your password.",
+                    "resendEmail": "Resend email",
+                    "continue": "Continue",
+                    "goBack": "Go Back"
+                }
+            }
+        },
+        "organisms": {
+            "chat": {
+                "history": {
+                    "index": {
+                        "showHistory": "Show history",
+                        "lastInputs": "Last Inputs",
+                        "noInputs": "Such empty...",
+                        "loading": "Loading..."
+                    }
+                },
+                "inputBox": {
+                    "input": {
+                        "placeholder": "Type your message here..."
+                    },
+                    "speechButton": {
+                        "start": "Start recording",
+                        "stop": "Stop recording"
+                    },
+                    "SubmitButton": {
+                        "sendMessage": "Send message",
+                        "stopTask": "Stop Task"
+                    },
+                    "UploadButton": {
+                        "attachFiles": "Attach files"
+                    },
+                    "waterMark": {
+                        "text": "Built with"
+                    }
+                },
+                "Messages": {
+                    "index": {
+                        "running": "Running",
+                        "executedSuccessfully": "executed successfully",
+                        "failed": "failed",
+                        "feedbackUpdated": "Feedback updated",
+                        "updating": "Updating"
+                    }
+                },
+                "dropScreen": {
+                    "dropYourFilesHere": "Drop your files here"
+                },
+                "index": {
+                    "failedToUpload": "Failed to upload",
+                    "cancelledUploadOf": "Cancelled upload of",
+                    "couldNotReachServer": "Could not reach the server",
+                    "continuingChat": "Continuing previous chat"
+                },
+                "settings": {
+                    "settingsPanel": "Settings panel",
+                    "reset": "Reset",
+                    "cancel": "Cancel",
+                    "confirm": "Confirm"
+                }
+            },
+            "threadHistory": {
+                "sidebar": {
+                    "filters": {
+                        "FeedbackSelect": {
+                            "feedbackAll": "Feedback: All",
+                            "feedbackPositive": "Feedback: Positive",
+                            "feedbackNegative": "Feedback: Negative"
+                        },
+                        "SearchBar": {
+                            "search": "Search"
+                        }
+                    },
+                    "DeleteThreadButton": {
+                        "confirmMessage": "This will delete the thread as well as it's messages and elements.",
+                        "cancel": "Cancel",
+                        "confirm": "Confirm",
+                        "deletingChat": "Deleting chat",
+                        "chatDeleted": "Chat deleted"
+                    },
+                    "index": {
+                        "pastChats": "Past Chats"
+                    },
+                    "ThreadList": {
+                        "empty": "Empty...",
+                        "today": "Today",
+                        "yesterday": "Yesterday",
+                        "previous7days": "Previous 7 days",
+                        "previous30days": "Previous 30 days"
+                    },
+                    "TriggerButton": {
+                        "closeSidebar": "Close sidebar",
+                        "openSidebar": "Open sidebar"
+                    }
+                },
+                "Thread": {
+                    "backToChat": "Go back to chat",
+                    "chatCreatedOn": "This chat was created on"
+                }
+            },
+            "header": {
+                "chat": "Chat",
+                "readme": "Readme"
+            }
+        }
+    },
+    "hooks": {
+        "useLLMProviders": {
+            "failedToFetchProviders": "Failed to fetch providers:"
+        }
+    },
+    "pages": {
+        "Design": {},
+        "Env": {
+            "savedSuccessfully": "Saved successfully",
+            "requiredApiKeys": "Required API Keys",
+            "requiredApiKeysInfo": "To use this app, the following API keys are required. The keys are stored on your device's local storage."
+        },
+        "Page": {
+            "notPartOfProject": "You are not part of this project."
+        },
+        "ResumeButton": {
+            "resumeChat": "Resume Chat"
+        }
+    }
 }
