@@ -1,16 +1,19 @@
+from __future__ import annotations
+
 import os
 import sys
-from typing import Any, Generator, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional
 
-import openai
 from injector import inject
-from openai import AzureOpenAI, OpenAI
 
 from taskweaver.llm.util import ChatMessageType, format_chat_message
 
 from .base import CompletionService, EmbeddingService, LLMServiceConfig
 
 DEFAULT_STOP_TOKEN: List[str] = ["<EOS>"]
+
+if TYPE_CHECKING:
+    from openai import OpenAI
 
 
 class OpenAIServiceConfig(LLMServiceConfig):
@@ -47,16 +50,11 @@ class OpenAIServiceConfig(LLMServiceConfig):
         self.response_format = self.llm_module_config.response_format
 
         # openai specific config
-        self.api_version = self._get_str("api_version", "2023-12-01-preview")
-        self.api_auth_type = self._get_enum(
-            "api_auth_type",
-            ["openai", "azure", "azure_ad"],
-            "openai",
-        )
+        self.api_version = self._get_str("api_version", "2024-06-01")
         is_azure_ad_login = self.api_type == "azure_ad"
         self.aad_auth_mode = self._get_enum(
             "aad_auth_mode",
-            ["device_login", "aad_app"],
+            ["device_login", "aad_app", "default_azure_credential"],
             None if is_azure_ad_login else "device_login",
         )
 
@@ -116,31 +114,41 @@ class OpenAIService(CompletionService, EmbeddingService):
     def __init__(self, config: OpenAIServiceConfig):
         self.config = config
 
-        api_type = self.config.api_type
+        self.api_type = self.config.api_type
 
-        assert api_type in ["openai", "azure", "azure_ad"], "Invalid API type"
+        assert self.api_type in ["openai", "azure", "azure_ad"], "Invalid API type"
 
-        if api_type == "openai":
+        self._client: Optional[OpenAI] = None
+
+    @property
+    def client(self):
+        from openai import AzureOpenAI, OpenAI
+
+        if self._client is not None:
+            return self._client
+
+        if self.api_type == "openai":
             client = OpenAI(
                 base_url=self.config.api_base,
                 api_key=self.config.api_key,
             )
-        elif api_type == "azure":
+        elif self.api_type == "azure":
             client = AzureOpenAI(
                 api_version=self.config.api_version,
                 azure_endpoint=self.config.api_base,
                 api_key=self.config.api_key,
             )
-        elif api_type == "azure_ad":
+        elif self.api_type == "azure_ad":
             client = AzureOpenAI(
                 api_version=self.config.api_version,
                 azure_endpoint=self.config.api_base,
-                azure_ad_token_provider=lambda: self._get_aad_token(),
+                azure_ad_token_provider=self._get_aad_token_provider(),
             )
         else:
-            raise Exception(f"Invalid API type: {api_type}")
+            raise Exception(f"Invalid API type: {self.api_type}")
 
-        self.client: OpenAI = client
+        self._client = client
+        return client
 
     def chat_completion(
         self,
@@ -152,6 +160,8 @@ class OpenAIService(CompletionService, EmbeddingService):
         stop: Optional[List[str]] = None,
         **kwargs: Any,
     ) -> Generator[ChatMessageType, None, None]:
+        import openai
+
         engine = self.config.model
 
         temperature = temperature if temperature is not None else self.config.temperature
@@ -170,6 +180,14 @@ class OpenAIService(CompletionService, EmbeddingService):
                 response_format = kwargs["response_format"]
             elif self.config.response_format == "json_object":
                 response_format = {"type": "json_object"}
+            elif self.config.response_format == "json_schema":
+                response_format = {"type": "json_schema"}
+                assert "json_schema" in kwargs, "JSON schema is required for JSON schema response format"
+                response_format["json_schema"] = {
+                    "name": "response",
+                    "strict": True,
+                    "schema": kwargs["json_schema"],
+                }
             else:
                 response_format = None
 
@@ -282,7 +300,25 @@ class OpenAIService(CompletionService, EmbeddingService):
         ).data
         return [r.embedding for r in embedding_results]
 
-    def _get_aad_token(self) -> str:
+    def _get_aad_token_provider(self) -> Callable[[], str]:
+        if self.config.aad_auth_mode == "default_azure_credential":
+            return self._get_aad_token_provider_azure_identity()
+        return lambda: self._get_aad_token_msal()
+
+    def _get_aad_token_provider_azure_identity(self) -> Callable[[], str]:
+        try:
+            from azure.identity import DefaultAzureCredential, get_bearer_token_provider  # type: ignore
+        except ImportError:
+            raise Exception(
+                "AAD authentication requires azure-identity module to be installed, "
+                "please run `pip install azure-identity`",
+            )
+        credential = DefaultAzureCredential(exclude_interactive_browser_credential=False)
+        print("Using DefaultAzureCredential for AAD authentication")
+        scope = f"{self.config.aad_api_resource}/{self.config.aad_api_scope}"
+        return get_bearer_token_provider(credential, scope)
+
+    def _get_aad_token_msal(self) -> str:
         try:
             import msal  # type: ignore
         except ImportError:
@@ -336,7 +372,7 @@ class OpenAIService(CompletionService, EmbeddingService):
             f"{api_resource}/{api_scope}",
         ]
         app: Any = msal.PublicClientApplication(
-            "feb7b661-cac7-44a8-8dc1-163b63c23df2",  # default id in Azure Identity module
+            "04b07795-8ddb-461a-bbee-02f9e1bf7b46",  # default id in Azure Identity module
             authority=authority,
             token_cache=cache,
         )

@@ -9,11 +9,10 @@ from taskweaver.code_interpreter.plugin_selection import PluginSelector, Selecte
 from taskweaver.llm import LLMApi
 from taskweaver.llm.util import ChatMessageType, format_chat_message
 from taskweaver.logging import TelemetryLogger
-from taskweaver.memory import Attachment, Conversation, Memory, Post, Round, RoundCompressor
+from taskweaver.memory import Attachment, Memory, Post, Round, RoundCompressor
 from taskweaver.memory.attachment import AttachmentType
-from taskweaver.memory.experience import Experience, ExperienceGenerator
+from taskweaver.memory.experience import ExperienceGenerator
 from taskweaver.memory.plugin import PluginEntry, PluginRegistry
-from taskweaver.misc.example import load_examples
 from taskweaver.module.event_emitter import PostEventProxy, SessionEventEmitter
 from taskweaver.module.tracing import Tracing, tracing_decorator
 from taskweaver.role import PostTranslator, Role
@@ -26,19 +25,11 @@ class CodeGeneratorConfig(RoleConfig):
         self._set_name("code_generator")
         self.role_name = self._get_str("role_name", "ProgramApe")
         self.load_plugin = self._get_bool("load_plugin", True)
-        self.load_example = self._get_bool("load_example", True)
         self.prompt_file_path = self._get_path(
             "prompt_file_path",
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
                 "code_generator_prompt.yaml",
-            ),
-        )
-        self.example_base_path = self._get_path(
-            "example_base_path",
-            os.path.join(
-                self.src.app_base_path,
-                "codeinterpreter_examples",
             ),
         )
         self.prompt_compression = self._get_bool("prompt_compression", False)
@@ -54,8 +45,6 @@ class CodeGeneratorConfig(RoleConfig):
             False,
         )
         self.auto_plugin_selection_topk = self._get_int("auto_plugin_selection_topk", 3)
-
-        self.use_experience = self._get_bool("use_experience", False)
 
         self.llm_alias = self._get_str("llm_alias", default="", required=False)
 
@@ -75,6 +64,7 @@ class CodeGenerator(Role):
         experience_generator: ExperienceGenerator,
     ):
         super().__init__(config, logger, tracing, event_emitter)
+        self.config = config
         self.llm_api = llm_api
 
         self.role_name = self.config.role_name
@@ -90,7 +80,6 @@ class CodeGenerator(Role):
         self.query_requirements_template = self.prompt_data["requirements"]
         self.response_json_schema = json.loads(self.prompt_data["response_json_schema"])
 
-        self.examples = None
         self.code_verification_on: bool = False
         self.allowed_modules: List[str] = []
 
@@ -103,14 +92,7 @@ class CodeGenerator(Role):
             logger.info("Plugin embeddings loaded")
             self.selected_plugin_pool = SelectedPluginPool()
 
-        if self.config.use_experience:
-            self.experience_generator = experience_generator
-            self.experience_generator.refresh()
-            self.experience_generator.load_experience()
-            self.logger.info(
-                "Experience loaded successfully, "
-                "there are {} experiences".format(len(self.experience_generator.experience_list)),
-            )
+        self.experience_generator = experience_generator
 
         self.logger.info("CodeGenerator initialized successfully")
 
@@ -165,15 +147,10 @@ class CodeGenerator(Role):
         self,
         rounds: List[Round],
         plugins: List[PluginEntry],
-        selected_experiences: Optional[List[Experience]] = None,
+        planning_enrichments: Optional[List[str]] = None,
     ) -> List[ChatMessageType]:
-        experiences = (
-            self.experience_generator.format_experience_in_prompt(
-                self.prompt_data["experience_instruction"],
-                selected_experiences,
-            )
-            if self.config.use_experience
-            else ""
+        experiences = self.format_experience(
+            template=self.prompt_data["experience_instruction"],
         )
 
         chat_history = [
@@ -183,8 +160,6 @@ class CodeGenerator(Role):
             ),
         ]
 
-        if self.examples is None:
-            self.examples = self.load_examples()
         for i, example in enumerate(self.examples):
             chat_history.extend(
                 self.compose_conversation(example.rounds, example.plugins, add_requirements=False),
@@ -206,12 +181,13 @@ class CodeGenerator(Role):
                 add_requirements=True,
                 summary=summary,
                 plugins=plugins,
+                planning_enrichments=planning_enrichments,
             ),
         )
         return chat_history
 
     def format_attachment(self, attachment: Attachment):
-        if attachment.type == AttachmentType.thought:
+        if attachment.type == AttachmentType.thought and "{ROLE_NAME}" in attachment.content:
             return attachment.content.format(ROLE_NAME=self.role_name)
         else:
             return attachment.content
@@ -222,8 +198,8 @@ class CodeGenerator(Role):
         plugins: List[PluginEntry],
         add_requirements: bool = False,
         summary: Optional[str] = None,
+        planning_enrichments: Optional[List[str]] = None,
     ) -> List[ChatMessageType]:
-        cur_round = rounds[-1]
         chat_history: List[ChatMessageType] = []
         ignored_types = [
             AttachmentType.revise_message,
@@ -254,17 +230,14 @@ class CodeGenerator(Role):
 
                 if post.send_from == "Planner" and post.send_to == self.alias:
                     # to avoid planner imitating the below handcrafted format,
-                    # we merge plan and query message in the code generator here
-                    user_query = conversation_round.user_query
-                    enrichment = f"The user request is: {user_query}\n\n"
+                    # we merge context information in the code generator here
+                    enrichment = ""
+                    if is_final_post:
+                        user_query = conversation_round.user_query
+                        enrichment = f"The user request is: {user_query}\n\n"
 
-                    supplementary_info_dict = cur_round.read_board()
-                    supplementary_info = "\n".join([bulletin for bulletin in supplementary_info_dict.values()])
-                    if supplementary_info != "":
-                        enrichment += (
-                            f"To better understand the user request, here is some additional information:\n"
-                            f" {supplementary_info}\n\n"
-                        )
+                        if planning_enrichments:
+                            enrichment += "Additional context:\n" + "\n".join(planning_enrichments) + "\n\n"
 
                     user_feedback = "None"
                     if last_post is not None and last_post.send_from == self.alias:
@@ -272,7 +245,7 @@ class CodeGenerator(Role):
 
                     user_message += self.user_message_head_template.format(
                         FEEDBACK=user_feedback,
-                        MESSAGE=f"{enrichment}{post.message}",
+                        MESSAGE=f"{enrichment}The task for this specific step is: {post.message}",
                     )
                 elif post.send_from == post.send_to == self.alias:
                     # for code correction
@@ -351,6 +324,7 @@ class CodeGenerator(Role):
         memory: Memory,
         post_proxy: Optional[PostEventProxy] = None,
         prompt_log_path: Optional[str] = None,
+        **kwargs: ...,
     ) -> Post:
         assert post_proxy is not None, "Post proxy is not provided."
 
@@ -370,12 +344,17 @@ class CodeGenerator(Role):
         if self.config.enable_auto_plugin_selection:
             self.plugin_pool = self.select_plugins_for_prompt(query)
 
-        if self.config.use_experience:
-            selected_experiences = self.experience_generator.retrieve_experience(query)
-        else:
-            selected_experiences = None
+        self.role_load_experience(query=query, memory=memory)
+        self.role_load_example(memory=memory, role_set={self.alias, "Planner"})
 
-        prompt = self.compose_prompt(rounds, self.plugin_pool, selected_experiences)
+        planning_enrichments = memory.get_shared_memory_entries(entry_type="plan")
+
+        prompt = self.compose_prompt(
+            rounds,
+            self.plugin_pool,
+            planning_enrichments=[pe.content for pe in planning_enrichments],
+        )
+
         self.tracing.set_span_attribute("prompt", json.dumps(prompt, indent=2))
         prompt_size = self.tracing.count_tokens(json.dumps(prompt))
         self.tracing.set_span_attribute("prompt_size", prompt_size)
@@ -424,7 +403,7 @@ class CodeGenerator(Role):
             self.selected_plugin_pool.filter_unused_plugins(code=generated_code)
 
         if prompt_log_path is not None:
-            self.logger.dump_log_file(prompt, prompt_log_path)
+            self.logger.dump_prompt_file(prompt, prompt_log_path)
 
         self.tracing.set_span_attribute("code", generated_code)
 
@@ -439,16 +418,6 @@ class CodeGenerator(Role):
                 [plugin.format_prompt() for plugin in plugin_list],
             )
         return ""
-
-    def load_examples(
-        self,
-    ) -> List[Conversation]:
-        if self.config.load_example:
-            return load_examples(
-                folder=self.config.example_base_path,
-                role_set={self.alias, "Planner"},
-            )
-        return []
 
     def get_plugin_pool(self) -> List[PluginEntry]:
         return self.plugin_pool

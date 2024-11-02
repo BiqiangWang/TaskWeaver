@@ -1,10 +1,8 @@
 import io
 import json
 import types
-from json import JSONDecodeError
 from typing import Any, Callable, Dict, Iterable, Iterator, List, Literal, Optional, Tuple, Union
 
-import ijson
 from injector import inject
 
 from taskweaver.llm.util import ChatMessageType
@@ -146,7 +144,7 @@ class PostTranslator:
         """
         if ignored_types is None:
             ignored_types = []
-        ignored_types.append(AttachmentType.board)
+        ignored_types.append(AttachmentType.shared_memory_entry)
 
         structured_llm: Dict[str, str] = {}
         for attachment in post.attachment_list:
@@ -180,7 +178,7 @@ class PostTranslator:
                         f"Invalid LLM output format: {structured_llm_output[key]}",
                     )
             return kv_pairs  # type: ignore
-        except (JSONDecodeError, AssertionError) as e:
+        except (json.JSONDecodeError, AssertionError) as e:
             self.logger.error(
                 f"Failed to parse LLM output due to {str(e)}. LLM output:\n {llm_output}",
             )
@@ -190,6 +188,8 @@ class PostTranslator:
         self,
         llm_output: Iterator[str],
     ) -> Iterator[Tuple[str, str, bool]]:
+        import ijson
+
         class StringIteratorIO(io.TextIOBase):
             def __init__(self, iter: Iterator[str]):
                 self._iter = iter
